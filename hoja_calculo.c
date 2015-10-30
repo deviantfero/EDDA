@@ -76,4 +76,5 @@ void establecer_hoja( struct nodo** cab, int fil, int col, int i, int j, struct 
 	nuevo->derecha = *inicio;
 	nuevo->abajo = *inicio;
 	*cab = *inicio;
+	//test comment
 }
