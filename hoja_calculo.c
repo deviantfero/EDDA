@@ -5,15 +5,19 @@
 
 struct nodo* crear_celda();
 void establecer_hoja( struct nodo** cab, int fil, int col, int i, int j, struct nodo* inicio );
+void insertar_celda( char col, int fil, struct nodo** cab, struct nodo* inicio );
 void mostrar_guia( struct nodo** cab, struct nodo* inicio );
+void mostrar_hoja( struct nodo** cab, struct nodo* iniciox, struct nodo* inicioy );
 
 int main( void ){
 	struct nodo* hoja1 = malloc( sizeof( struct nodo ) );
 	hoja1->dato = malloc( sizeof( int ) );
 	*((int*)hoja1->dato) = 0;
-	establecer_hoja( &hoja1, 5, 3, 0, 0, hoja1 );
+	establecer_hoja( &hoja1, 6, 6, 0, 0, hoja1 );
+//	insertar_celda( 'A', 0, &hoja1, hoja1 );
+//	insertar_celda( 'A', 1, &hoja1, hoja1 );
 	printf("%6s", "");
-	mostrar_guia( &hoja1, hoja1 );
+	mostrar_hoja( &hoja1, hoja1, hoja1 );
 	return 0;
 }
 
@@ -50,20 +54,35 @@ struct nodo* crear_celda(){
 	return nuevo;
 }
 
-
-//esto hace el margen basico de la hoja, donde se ubicaran el resto
-//los hice nodos para que en la funcion de imprimir solo imprimo el dato
-//y luego imprimo los adyacentes!
 void establecer_hoja( struct nodo** cab, int fil, int col, int i, int j, struct nodo* inicio ){
-	establecer_fila( cab, fil, i, inicio );
-	*cab = inicio;
 	establecer_columna( cab, col, j, inicio );
+	*cab = inicio;
+	establecer_fila( cab, fil, i, inicio );
 	*cab = inicio;
 }
 
-void mostrar_guia( struct nodo** cab, struct nodo* inicio ){
-	mostrar_columnas( cab, inicio );
-	*cab = inicio;
-	mostrar_filas( cab, inicio );
-	*cab = inicio;
+void insertar_celda( char col, int fil, struct nodo** cab, struct nodo* inicio ){
+	struct nodo* nuevo = crear_celda();
+	insertar_columna( col, cab, inicio, &nuevo );
+	insertar_fila( fil, cab, inicio, &nuevo );
+}
+
+void mostrar_hoja( struct nodo** cab, struct nodo* iniciox, struct nodo* inicioy ){
+	if( (*cab)->derecha != iniciox ){
+		switch( (*cab)->derecha->flag ){
+			case NUMERO:
+				printf( "%-1s%d%2s|", "", *((int*)(*cab)->derecha->dato), "" );
+				break;
+			case LETRA:
+				printf( "%-2s%c%2s|", "", *((char*)(*cab)->derecha->dato), "" );
+				break;
+			case FLOAT:
+				printf( "%-2s%3.2f%2s|", "", *((float*)(*cab)->derecha->dato), "" );
+				break;
+		}
+		mostrar_hoja( &(*cab)->derecha, iniciox, inicioy );
+	}else if( (*cab)->derecha->abajo != inicioy ){
+		printf( "\n -----\n|%-2s%d%2s|", "", *((int*)(*cab)->derecha->dato),"" );
+		mostrar_hoja( &(*cab)->derecha->abajo, iniciox->abajo, inicioy );
+	}
 }
