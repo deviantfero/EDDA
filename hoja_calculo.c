@@ -1,27 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-typedef enum{ NUMERO, LETRA, FLOAT }tipo_dato;
-
-struct nodo{
-	void* dato;
-	char columna;
-	int fila;
-	struct nodo* derecha;
-	struct nodo* abajo;
-	int flag;
-};
+#include "structures.c"
+#include "support.c"
 
 struct nodo* crear_celda();
 void establecer_hoja( struct nodo** cab, int fil, int col, int i, int j, struct nodo** inicio );
-void mostrar_guia( int fil_init, char col_init, int fil_fin, char col_fin, struct nodo* cab );
+void mostrar_guia( struct nodo** cab, struct nodo** inicio );
 
 int main( void ){
 	struct nodo* hoja1 = malloc( sizeof( struct nodo ) );
-	hoja1->derecha = NULL;
-	hoja1->abajo = NULL;
-	establecer_hoja( &hoja1, 3, 2, 0, 0, &hoja1 );
-	//mostrar_guia( 0, 'A', 4, 'D', hoja1 );
+	establecer_hoja( &hoja1, 5, 3, 0, 0, &hoja1 );
+	printf("%6s", "");
+	mostrar_guia( &(hoja1), &(hoja1) );
 	return 0;
 }
 
@@ -58,54 +48,20 @@ struct nodo* crear_celda(){
 	return nuevo;
 }
 
+
 //esto hace el margen basico de la hoja, donde se ubicaran el resto
 //los hice nodos para que en la funcion de imprimir solo imprimo el dato
 //y luego imprimo los adyacentes!
 void establecer_hoja( struct nodo** cab, int fil, int col, int i, int j, struct nodo** inicio ){
-	struct nodo* nuevo = malloc( sizeof( struct nodo ) );
-	if( fil ){
-		nuevo->dato = malloc( sizeof( int ) );
-		*((int*)nuevo->dato) = i;
-		printf( "FILA %d\n", *((int*)nuevo->dato) );
-		(*cab)->derecha = nuevo;
-		establecer_hoja( &(*cab)->derecha, fil - 1, col, i + 1, j, inicio );
-	}else if( col ){
-		nuevo->dato = malloc( sizeof( char ) );
-		*((char*)nuevo->dato) = 'A' + j;
-		printf( "COLUMNA %c\n", *((char*)nuevo->dato));
-		(*cab)->abajo = nuevo;
-		establecer_hoja( &(*cab)->abajo, fil, col - 1, i, j + 1, inicio );
-	}
-	nuevo->derecha = *inicio;
-	nuevo->abajo = *inicio;
+	establecer_columna( cab, col, j, inicio );
+	*cab = *inicio;
+	establecer_fila( cab, fil, i, inicio );
 	*cab = *inicio;
 }
 
-void mostrar_guia( int fil_init, char col_init, int fil_fin, char col_fin, struct nodo* cab ){
-	struct nodo* aux = cab;
-	printf("%6s", "");
-	for( char i = 'A'; i <= col_fin; i++ )
-		printf( "|%-2s%c%2s", "", i, "" );
-	printf( "|\n" );
-	for( int i = 0; i <= fil_fin; i++ ){
-		printf( " -----\n|%-2s%d%2s|", "", i,"" );
-		if( aux ){
-			switch( aux->flag ){
-				case NUMERO:
-					printf( "%-2s%d%2s|", "", *((int*)aux->dato), "" );
-					aux = aux->derecha;
-					break;
-				case LETRA:
-					printf( "%-2s%c%2s|", "", *((char*)aux->dato), "" );
-					aux = aux->derecha;
-					break;
-				case FLOAT:
-					printf( "%-2s%d%2s|", "", *((float*)aux->dato), "" );
-					aux = aux->derecha;
-					break;
-			}
-		}else
-			break;
-	}
-	printf( "\n -----" );
+void mostrar_guia( struct nodo** cab, struct nodo** inicio ){
+	mostrar_columnas( cab );
+	*cab = *inicio;
+	mostrar_filas( cab );
+	*cab = *inicio;
 }
