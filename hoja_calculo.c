@@ -204,7 +204,7 @@ void mostrar_hoja( struct nodo** cab, struct nodo* iniciox, struct nodo* inicioy
 				printf( "%4c |", *((char*)(*cab)->derecha->dato) );
 				break;
 			case FLOAT:
-				printf( "%4.2f |", "", *((float*)(*cab)->derecha->dato), "" );
+				printf( "%4.2f |", *((float*)(*cab)->derecha->dato) );
 				break;
 		}
 		mostrar_hoja( &(*cab)->derecha, iniciox, inicioy, cont + 1 );
