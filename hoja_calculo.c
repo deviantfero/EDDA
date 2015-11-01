@@ -3,23 +3,98 @@
 #include "structures.c"
 #include "support.c"
 
+int menu();
 struct nodo* crear_celda();
 void establecer_hoja( struct nodo** cab, int fil, int col, int i, int j, struct nodo* inicio );
 void insertar_celda( char col, int fil, struct nodo** cab, struct nodo* inicio );
 void borrar_celda( char col, int fil, struct nodo** cab, struct nodo* inicio );
+void intercambiar_celdas( struct nodo** cab1, struct nodo** cab2, struct nodo* init );
 void mostrar_hoja( struct nodo** cab, struct nodo* iniciox, struct nodo* inicioy, char cont );
 
 int main( void ){
+	int flag = 0; int exit = 0;
+	int x, y;
 	struct nodo* hoja1 = malloc( sizeof( struct nodo ) );
 	hoja1->dato = malloc( sizeof( int ) );
 	*((int*)hoja1->dato) = 0;
-	establecer_hoja( &hoja1, 5, 5, 0, 0, hoja1 );
-	insertar_celda( 'E', 1, &hoja1, hoja1 );
-	insertar_celda( 'B', 4, &hoja1, hoja1 );
-	mostrar_hoja( &hoja1, hoja1, hoja1, 'A' );
-	borrar_celda( 'B', 4, &hoja1, hoja1 );
-	mostrar_hoja( &hoja1, hoja1, hoja1, 'A' );
+	while( !exit ){
+		switch( menu() ){
+			case 0:
+				exit = 1;
+				break;
+			case 1:
+				if( !flag ){
+					printf( "QUE DIMENSIONES DESEA SU HOJA ?(X): " );
+					scanf("%d", &x ); getchar();
+					printf( "(Y): " ); scanf( "%d", &y ); getchar();
+					establecer_hoja( &hoja1, y, x, 0, 0, hoja1 );
+					printf( "\n\n\n" );
+					mostrar_hoja( &hoja1, hoja1, hoja1, 'A' );
+					flag = 1;
+				}else
+					printf("SU HOJA YA ESTA ESTABLECIDA!\n");
+				break;
+			case 2:
+				if( flag )
+					mostrar_hoja( &hoja1, hoja1, hoja1, 'A' );
+				else
+					printf( "TIENE QUE ESTABLECER HOJA ANTES\n" );
+				break;
+			case 3:
+				if( flag ){
+					char col; int fil;
+					do{
+						printf( "EN QUE COLUMNA? : ");
+						scanf( "%c", &col ); getchar();
+						printf( "EN QUE FILA?: " );
+						scanf( "%d", &fil ); getchar();
+					}while( col > x + 64 ||  fil > y - 1 );
+					insertar_celda( col, fil + 1, &hoja1, hoja1 );
+					mostrar_hoja( &hoja1, hoja1, hoja1, 'A' );
+				}else
+					printf( "TIENE QUE ESTABLECER HOJA ANTES\n" );
+				break;
+			case 4:
+				if( flag ){
+					char col; int fil;
+					do{
+						printf( "EN QUE COLUMNA? : " );
+						scanf( "%c", &col ); getchar();
+						printf( "EN QUE FILA?: " );
+						scanf( "%d", &fil ); getchar();
+					}while( col > x + 64 || fil > y - 1 );
+					borrar_celda( col, fil + 1, &hoja1, hoja1 );
+					mostrar_hoja( &hoja1, hoja1, hoja1, 'A' );
+				}else
+					printf( "TIENE QUE ESTABLECER HOJA ANTES\n" );
+				break;
+			case 5:
+				if( flag ){
+					intercambiar_celdas( &hoja1, &hoja1, hoja1 );
+					mostrar_hoja( &hoja1, hoja1, hoja1, 'A' );
+				}else
+					printf( "TIENE QUE ESTABLECER HOJA ANTES\n" );
+				break;
+		}
+	}
 	return 0;
+}
+
+int menu(){
+	int opt;
+	printf( "--MENU--\n" );
+	do{
+		printf( "\t1. ESTABLECER HOJA\n" );
+		printf( "\t2. MOSTRAR HOJA\n" );
+		printf( "\t3. INSERTAR CELDA\n" );
+		printf( "\t4. BORRAR CELDA\n" );
+		printf( "\t5. INTERCAMBIAR CELDAS\n" );
+		printf( "\t0. SALIR\n" );
+		printf( ":" );
+		scanf( "%d", &opt );
+		getchar();
+	}while( opt > 5 || opt < 0 );
+	return opt;
 }
 
 struct nodo* crear_celda(){
@@ -74,6 +149,45 @@ void borrar_celda( char col, int fil, struct nodo** cab, struct nodo* inicio ){
 		borrar_columna( col, fil, &(*cab)->derecha, inicio );
 	}else
 		printf( "La celda seleccionada no tiene ningun contenido\n" );
+}
+
+void intercambiar_celdas( struct nodo** cab1, struct nodo** cab2, struct nodo* init ){
+	char col1, col2;
+	int fil1, fil2;
+	struct nodo *aux, *aux2;
+	do{
+		printf("(CELDA 1) EN QUE COLUMNA? : ");
+		scanf( "%c", &col1 );
+		getchar();
+		printf("(CELDA 1) EN QUE FILA? : ");
+		scanf( "%d", &fil1 );
+		getchar();
+	}while( !encontrar_columna( col1, fil1 + 1, cab1, *cab1 ) );
+	fil1++; //para poder ingresar 0, el programa toma 1 como la fila 0
+	//razon de este bug desconocida
+	do{
+		printf("(CELDA 2) EN QUE COLUMNA? : ");
+		scanf( "%c", &col2 );
+		getchar();
+		printf("(CELDA 2) EN QUE FILA? : ");
+		scanf( "%d", &fil2 );
+		getchar();
+	}while( !encontrar_columna( col2, fil2 + 1, cab2, *cab2 ) );
+	fil2++;
+	if( col1 == col2 && fil1 == fil2 )
+		return;
+	aux = retornar_columna( col1, fil1, cab1, *cab1 );
+	borrar_celda( col1, fil1, cab1, init );
+	aux->columna = col2;
+	aux->fila = fil2;
+	aux2 = retornar_columna( col2, fil2, cab1, *cab1 );
+	borrar_celda( col2, fil2, cab2, init );
+	aux2->columna = col1;
+	aux2->fila = fil1;
+	insertar_columna( col2, &(*cab1)->derecha, init->derecha, &aux );
+	insertar_fila( fil2, &(*cab1)->abajo, init->abajo, &aux );
+	insertar_columna( col1, &(*cab2)->derecha, init->derecha, &aux2 );
+	insertar_fila( fil1, &(*cab2)->abajo, init->abajo, &aux2 );
 }
 
 void mostrar_hoja( struct nodo** cab, struct nodo* iniciox, struct nodo* inicioy, char cont ){

@@ -115,3 +115,32 @@ void borrar_columna( char col, int fil, struct nodo** cab, struct nodo* inicio )
 		(*cab)->abajo = inicio;
 	}
 }
+
+struct nodo* retornar_columna( char col, int fil, struct nodo** cab, struct nodo* inicio ){
+	if( (*cab)->columna < col ){
+		retornar_columna( col, fil, &(*cab)->derecha, inicio->derecha  );
+	}else{ 
+		if( (*cab)->fila < fil ){
+			if( (*cab)->abajo == inicio )
+				return NULL;
+			else
+				retornar_columna( col, fil, &(*cab)->abajo, inicio );
+		}else
+			return (*cab);
+	}
+}
+
+struct nodo* retornar_fila( char col, int fil, struct nodo** cab, struct nodo* inicio ){
+	if( (*cab)->fila < fil ){
+		retornar_fila( col, fil, &(*cab)->abajo, inicio->abajo  );
+	}else{ 
+		if( (*cab)->columna < col ){
+			if( (*cab)->derecha == inicio )
+				return NULL;
+			else
+				retornar_fila( col, fil, &(*cab)->derecha, inicio );
+		}else
+			return (*cab);
+	}
+}
+
