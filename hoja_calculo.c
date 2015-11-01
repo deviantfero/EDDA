@@ -6,18 +6,19 @@
 struct nodo* crear_celda();
 void establecer_hoja( struct nodo** cab, int fil, int col, int i, int j, struct nodo* inicio );
 void insertar_celda( char col, int fil, struct nodo** cab, struct nodo* inicio );
-void mostrar_guia( struct nodo** cab, struct nodo* inicio );
-void mostrar_hoja( struct nodo** cab, struct nodo* iniciox, struct nodo* inicioy );
+void borrar_celda( char col, int fil, struct nodo** cab, struct nodo* inicio );
+void mostrar_hoja( struct nodo** cab, struct nodo* iniciox, struct nodo* inicioy, char cont );
 
 int main( void ){
 	struct nodo* hoja1 = malloc( sizeof( struct nodo ) );
 	hoja1->dato = malloc( sizeof( int ) );
 	*((int*)hoja1->dato) = 0;
-	establecer_hoja( &hoja1, 6, 6, 0, 0, hoja1 );
-//	insertar_celda( 'A', 0, &hoja1, hoja1 );
-//	insertar_celda( 'A', 1, &hoja1, hoja1 );
-	printf("%6s", "");
-	mostrar_hoja( &hoja1, hoja1, hoja1 );
+	establecer_hoja( &hoja1, 5, 5, 0, 0, hoja1 );
+	insertar_celda( 'E', 1, &hoja1, hoja1 );
+	insertar_celda( 'B', 4, &hoja1, hoja1 );
+	mostrar_hoja( &hoja1, hoja1, hoja1, 'A' );
+	borrar_celda( 'B', 4, &hoja1, hoja1 );
+	mostrar_hoja( &hoja1, hoja1, hoja1, 'A' );
 	return 0;
 }
 
@@ -56,33 +57,47 @@ struct nodo* crear_celda(){
 
 void establecer_hoja( struct nodo** cab, int fil, int col, int i, int j, struct nodo* inicio ){
 	establecer_columna( cab, col, j, inicio );
-	*cab = inicio;
 	establecer_fila( cab, fil, i, inicio );
-	*cab = inicio;
 }
 
 void insertar_celda( char col, int fil, struct nodo** cab, struct nodo* inicio ){
 	struct nodo* nuevo = crear_celda();
-	insertar_columna( col, cab, inicio, &nuevo );
-	insertar_fila( fil, cab, inicio, &nuevo );
+	nuevo->columna = col;
+	nuevo->fila = fil;
+	insertar_fila( fil, &(*cab)->abajo, inicio->abajo, &nuevo );
+	insertar_columna( col, &(*cab)->derecha, inicio->derecha, &nuevo );
 }
 
-void mostrar_hoja( struct nodo** cab, struct nodo* iniciox, struct nodo* inicioy ){
+void borrar_celda( char col, int fil, struct nodo** cab, struct nodo* inicio ){
+	if( encontrar_columna( col, fil, cab, *cab )  ){
+		borrar_fila( col, fil, &(*cab)->abajo, inicio );
+		borrar_columna( col, fil, &(*cab)->derecha, inicio );
+	}else
+		printf( "La celda seleccionada no tiene ningun contenido\n" );
+}
+
+void mostrar_hoja( struct nodo** cab, struct nodo* iniciox, struct nodo* inicioy, char cont ){
+	if( (*cab)->fila== 0 && (*cab)->columna == 0 )
+		printf("%5s|", "");
+	for( char aux = cont; cont < (*cab)->derecha->columna; cont++ )
+		printf( "%5s|","" );
 	if( (*cab)->derecha != iniciox ){
 		switch( (*cab)->derecha->flag ){
 			case NUMERO:
-				printf( "%-1s%d%2s|", "", *((int*)(*cab)->derecha->dato), "" );
+				printf( "%4d |", *((int*)(*cab)->derecha->dato) );
 				break;
 			case LETRA:
-				printf( "%-2s%c%2s|", "", *((char*)(*cab)->derecha->dato), "" );
+				printf( "%4c |", *((char*)(*cab)->derecha->dato) );
 				break;
 			case FLOAT:
-				printf( "%-2s%3.2f%2s|", "", *((float*)(*cab)->derecha->dato), "" );
+				printf( "%4.2f |", "", *((float*)(*cab)->derecha->dato), "" );
 				break;
 		}
-		mostrar_hoja( &(*cab)->derecha, iniciox, inicioy );
+		mostrar_hoja( &(*cab)->derecha, iniciox, inicioy, cont + 1 );
 	}else if( (*cab)->derecha->abajo != inicioy ){
-		printf( "\n -----\n|%-2s%d%2s|", "", *((int*)(*cab)->derecha->dato),"" );
-		mostrar_hoja( &(*cab)->derecha->abajo, iniciox->abajo, inicioy );
+		printf( "\n ----\n|%3d |", *((int*)(*cab)->derecha->dato) );
+		mostrar_hoja( &(*cab)->derecha->abajo, iniciox->abajo, inicioy, 'A' );
+	}else{
+		printf( "\n\n" );
 	}
 }
